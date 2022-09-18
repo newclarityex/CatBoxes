@@ -80,7 +80,7 @@ function App() {
             element.style.transitionDuration = `0.5s`;
             await delay(50);
             // Move up and fade in
-            element.style.opacity = `0.2`;
+            element.style.opacity = `0.4`;
             element.style.transform = `translateY(-100%)`;
             await delay(500);
             // Move to new position
@@ -193,8 +193,9 @@ function App() {
               disabled={animating}
             >
               <img src="box-test.svg" className="w-12 h-12" />
-              {i + 1}
-              {possibleLocations.has(i) ? "🐱" : ""}
+              <div className={`transition-opacity duration-500 ${possibleLocations.has(i) && !animating ? 'opacity-100' : 'opacity-0'}`}>
+                🐱
+              </div>
             </button>
           </div>
         ))}
