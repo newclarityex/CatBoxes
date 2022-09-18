@@ -67,8 +67,8 @@ function App() {
             const element = catMovement.ref;
             if (!element) return;
             element.style.display = `block`;
-            await delay(10); 
             element.style.transitionDuration = `0s`;
+            await delay(10); 
             // Get original position
             const originalPosition = boxRefs.current[catMovement.from]?.getBoundingClientRect();
             // Move to original position
@@ -78,7 +78,7 @@ function App() {
             element.style.opacity = `0`;
             await delay(10);
             element.style.transitionDuration = `0.5s`;
-            await delay(50);
+            await delay(10);
             // Move up and fade in
             element.style.opacity = `0.4`;
             element.style.transform = `translateY(-100%)`;
@@ -113,7 +113,6 @@ function App() {
     setPossibleLocations(new Set(boxes.map((_, i) => i)));
   };
 
-  const duration = 300;
   const transitionStyles = {
     entering: { opacity: 0 },
     entered: { opacity: 1 },
@@ -158,6 +157,7 @@ function App() {
             style={{
               display: "none",
               opacity: 0,
+              transitionDuration: "0s",
             }}
           >
             🐱
