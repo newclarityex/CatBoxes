@@ -4,48 +4,124 @@ import { useEffect, useRef, useState } from "react";
 
 function App() {
   const [count, setCount] = useState(1 as number);
-  const possibleLocations = useRef(new Set() as Set<number>);
-  const [catMovements, setCatMovements] = useState([] as [number, number][]);
+  const [possibleLocations, setPossibleLocations] = useState(new Set() as Set<number>);
+  const [catMovements, setCatMovements] = useState([] as {
+    from: number;
+    to: number;
+    ref: null | HTMLDivElement;
+  }[]);
+  
+  const boxRefs = useRef({} as {
+    [key: number]: (HTMLDivElement | null);
+  });
 
   //Boxes array
   let boxes = new Array(count).fill(0);
 
   //We need to generate a cat in each box
   useEffect(() => {
-    possibleLocations.current = new Set(boxes.map((_, i) => i));
+    setPossibleLocations(new Set(boxes.map((_, i) => i)));
   }, [count]);
 
   //Logic for adjustment boxes of cat movements
   const catSteps = () => {
-    console.log("possibleLocations", possibleLocations.current);
     let newPossibleLocations = new Set() as Set<number>;
-    let newCatMovements = [] as [number, number][];
-    possibleLocations.current.forEach((location) => {
+    let newCatMovements = [] as {
+        from: number;
+        to: number;
+        ref: null | HTMLDivElement;
+    }[];
+    possibleLocations.forEach((location) => {
       let possibleSteps = [] as number[];
       if (location - 1 >= 0) possibleSteps.push(location - 1);
       if (location + 1 < count) possibleSteps.push(location + 1);
       possibleSteps.forEach((step) => {
         newPossibleLocations.add(step);
-        newCatMovements.push([location, step]);
+        newCatMovements.push({
+            from: location,
+            to: step,
+            ref: null,
+        });
       });
     });
-    console.log("newPossibleLocations", newPossibleLocations);
-    possibleLocations.current = newPossibleLocations;
+    setPossibleLocations(newPossibleLocations);
     setCatMovements(newCatMovements);
   };
 
+  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+  const [animating, setAnimating] = useState(false);
+  const handleAnimation = () => {
+    catMovements.forEach(async (catMovement) => {
+        if (catMovement.ref) {
+            setAnimating(true);
+            const element = catMovement.ref;
+            if (!element) return;
+            element.style.display = `block`;
+            await delay(10); 
+            element.style.transitionDuration = `0s`;
+            // Get original position
+            const originalPosition = boxRefs.current[catMovement.from]?.getBoundingClientRect();
+            // Move to original position
+            element.style.top = `${originalPosition?.top}px`;
+            element.style.left = `${originalPosition?.left}px`;
+            await delay(10);
+            element.style.transitionDuration = `0.5s`;
+            await delay(50);
+            // Move up and fade in
+            element.style.opacity = `0.2`;
+            element.style.transform = `translateY(-100%)`;
+            await delay(500);
+            // Move to new position
+            const newPosition = boxRefs.current[catMovement.to]?.getBoundingClientRect();
+            element.style.top = `${newPosition?.top}px`;
+            element.style.left = `${newPosition?.left}px`;
+            await delay(500);
+            // Move down
+            element.style.transform = `translateY(0)`;
+            element.style.opacity = `0`;
+            await delay(500);
+            element.style.display = `none`;
+            setAnimating(false);
+        }
+    });
+  }
+
+  useEffect(() => {
+    handleAnimation();
+    console.log(animating);
+    
+  }, [catMovements]);
+
   const handleBox = (index: number) => {
-    possibleLocations.current.delete(index);
+    possibleLocations.delete(index);
+    setPossibleLocations(new Set(possibleLocations));
     catSteps();
   };
 
   return (
     <div className="w-full h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-center items-center font-mono">
+    {
+        catMovements.map((catMovement, i) => {
+            return (
+                <div
+                    key={`movement-${i}`}
+                    className="absolute transition-all text-3xl"
+                    ref={(ref) => catMovement.ref = ref}
+                    style={{
+                        display: "none",
+                    }}
+                >
+                🐱
+                </div>
+            );
+        })
+    }
       <h1 className="text-6xl">Try to catch a cat</h1>
       <div className="flex gap-24 flex-row mt-16 ">
         <button
           className="text-4xl w-40 text-center"
-          disabled={count <= 1}
+          disabled={count <= 1 || animating}
           onClick={() => setCount(count - 1)}
         >
           Remove
@@ -53,6 +129,7 @@ function App() {
         <p className="text-3xl w-40 text-center">{count}</p>
         <button
           className="text-4xl w-40 text-center"
+          disabled={count > 10 || animating}
           onClick={() => setCount(count + 1)}
         >
           Add
@@ -60,11 +137,12 @@ function App() {
       </div>
       <div className="flex gap-3 flex-row mt-32">
         {boxes.map((_, i) => (
-          <div>
-            <button className="text-2xl" key={i} onClick={() => handleBox(i)}>
-            <img src="box-test.svg" className="w-12 h-12"/>{i + 1}
+          <div key={`box-${i}`} ref={(ref) => boxRefs.current[i] = ref}>
+            <button className="text-2xl" onClick={() => handleBox(i)} disabled={animating}>
+            <img src="box-test.svg" className="w-12 h-12"/>
+            {i + 1}
+            {possibleLocations.has(i) ? "🐱" : ""}
             </button>
-            
           </div>
         ))}
       </div>
