@@ -65,6 +65,8 @@ function App() {
             // Move to original position
             element.style.top = `${originalPosition?.top}px`;
             element.style.left = `${originalPosition?.left}px`;
+            element.style.transform = `translateY(0)`;
+            element.style.opacity = `0`;
             await delay(10);
             element.style.transitionDuration = `0.5s`;
             await delay(50);
@@ -110,6 +112,7 @@ function App() {
                     ref={(ref) => catMovement.ref = ref}
                     style={{
                         display: "none",
+                        opacity: 0,
                     }}
                 >
                 🐱
