@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Transition } from 'react-transition-group';
 
 function App() {
   const [open, setOpen] = useState(false);
@@ -112,12 +113,25 @@ function App() {
     setPossibleLocations(new Set(boxes.map((_, i) => i)));
   };
 
+  const duration = 300;
+  const transitionStyles = {
+    entering: { opacity: 0 },
+    entered: { opacity: 1 },
+    exiting: { opacity: 1 },
+    exited: { opacity: 0 },
+    unmounted: { opacity: 0 },
+  };
+
   return (
     <div className="w-full h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-center items-center font-mono">
-      {open && (
-        <div
+    <Transition in={open} timeout={300}>
+        {(state) => (<div
           id="modal"
-          className="w-full h-full absolute bg-black/40 flex justify-center items-center"
+          className="w-full h-full absolute bg-black/40 flex justify-center items-center transition-opacity duration-300"
+          style={{
+            ...transitionStyles[state],
+            pointerEvents: state === "exited" ? "none" : "all",
+          }}
         >
           <div className="bg-white p-4 flex flex-col gap-20 items-center rounded-lg">
             <h1 className="text-center">You caught a Schrodinger's kitty!</h1>
@@ -132,8 +146,8 @@ function App() {
               </a>
             </div>
           </div>
-        </div>
-      )}
+        </div>)}
+    </Transition>  
 
       {catMovements.map((catMovement, i) => {
         return (
