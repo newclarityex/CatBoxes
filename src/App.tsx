@@ -51,7 +51,9 @@ function App() {
     });
     setPossibleLocations(newPossibleLocations);
     setCatMovements(newCatMovements);
-    setOpen(true);
+    if (newPossibleLocations.size === 0) {
+      setOpen(true);
+    }
   };
 
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -107,7 +109,7 @@ function App() {
 
   const restart = () => {
     setOpen(false);
-    setCount(1);
+    setPossibleLocations(new Set(boxes.map((_, i) => i)));
   };
 
   return (
