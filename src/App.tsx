@@ -164,7 +164,7 @@ function App() {
   return (
     <>
     <div className="-z-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 fixed w-full h-full"></div>
-    <div className="w-full h-full flex flex-col md:justify-evenly items-center font-mono px-8">
+    <div className="w-full h-full flex flex-col 2xl:justify-evenly items-center font-mono px-8">
     <Transition in={open} timeout={300}>
         {(state) => (<div
           id="modal"
@@ -244,7 +244,7 @@ function App() {
           </div>
         ))}
       </div>
-      <div className="flex gap-12 md:gap-24 flex-row mt-16 text-xl text-white">
+      <div className="flex gap-12 2xl:gap-24 flex-row mt-16 text-xl text-white">
         <button
           className="w-36 text-center border-white border-2 rounded-lg p-2 hover:opacity-80"
           disabled={count > 10 || animating}
@@ -260,7 +260,7 @@ function App() {
           Remove Box
         </button>
       </div>
-      <div className="text-xl md:text-2xl text-white px-8 text-center my-12">
+      <div className="text-xl 2xl:text-2xl text-white px-8 text-center my-12">
         <p>
           Made with &hearts; by{" "}
           <a href="https://github.com/newclarityex">Kira</a> and{" "}
