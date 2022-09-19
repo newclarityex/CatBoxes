@@ -149,6 +149,7 @@ function App() {
 
   const restart = () => {
     setOpen(false);
+    setAnimating(false);
     setPossibleLocations(new Set(boxes.map((_, i) => i)));
   };
 
