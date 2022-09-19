@@ -62,48 +62,87 @@ function App() {
   const [animating, setAnimating] = useState(false);
   const handleAnimation = () => {
     catMovements.forEach(async (catMovement) => {
-        if (catMovement.ref) {
-            setAnimating(true);
-            const element = catMovement.ref;
-            if (!element) return;
-            element.style.display = `block`;
-            element.style.transitionDuration = `0s`;
-            await delay(10); 
-            // Get original position
-            const originalPosition = boxRefs.current[catMovement.from]?.getBoundingClientRect();
-            // Move to original position
-            element.style.top = `${originalPosition?.top}px`;
-            element.style.left = `${originalPosition?.left}px`;
-            element.style.transform = `translateY(0)`;
-            element.style.opacity = `0`;
-            await delay(10);
-            element.style.transitionDuration = `0.5s`;
-            await delay(10);
-            // Move up and fade in
-            element.style.opacity = `0.4`;
-            element.style.transform = `translateY(-100%)`;
-            await delay(500);
-            // Move to new position
-            const newPosition = boxRefs.current[catMovement.to]?.getBoundingClientRect();
-            element.style.top = `${newPosition?.top}px`;
-            element.style.left = `${newPosition?.left}px`;
-            await delay(500);
-            // Move down
-            element.style.transform = `translateY(0)`;
-            element.style.opacity = `0`;
-            await delay(500);
-            element.style.display = `none`;
-            setAnimating(false);
-        }
+        if (!catMovement.ref) return;
+        const element = catMovement.ref;
+        if (!element) return;
+        element.style.display = `block`;
+        element.style.transitionDuration = `0s`;
+        await delay(20); 
+        // Get center of the element
+        const originalPosition = boxRefs.current[catMovement.from]?.getBoundingClientRect();
+        if (!originalPosition) return;
+        const originalCenter = {
+            x: originalPosition?.left + originalPosition?.width / 2,
+            y: originalPosition?.top + originalPosition?.height / 2,
+        };
+        // Move to original position
+        element.style.top = `${originalCenter.y}px`;
+        element.style.left = `${originalCenter.x}px`;
+        element.style.transform = `translateY(0)`;
+        element.style.opacity = `0`;
+        await delay(20);
+        element.style.transitionDuration = `0.5s`;
+        await delay(20);
+        // Move up and fade in
+        element.style.opacity = `0.4`;
+        element.style.transform = `translateY(-100%)`;
+        await delay(500);
+        // Move to new position
+        const newPosition = boxRefs.current[catMovement.to]?.getBoundingClientRect();
+        if (!newPosition) return;
+        const newCenter = {
+            x: newPosition?.left + newPosition?.width / 2,
+            y: newPosition?.top + newPosition?.height / 2,
+        };
+        element.style.top = `${newCenter.y}px`;
+        element.style.left = `${newCenter.x}px`;
+        await delay(500);
+        // Move down
+        element.style.transform = `translateY(0)`;
+        element.style.opacity = `0`;
+        await delay(500);
+        element.style.display = `none`;
+        setAnimating(false);
     });
+  };
+
+  const killedCat = useRef(null as null | HTMLDivElement);
+  const killCat = async (index: number) => {
+    if (!killedCat.current) return;
+    const originalPosition = boxRefs.current[index]?.getBoundingClientRect();
+    if (!originalPosition) return;
+    const originalCenter = {
+        x: originalPosition?.left + originalPosition?.width / 2,
+        y: originalPosition?.top + originalPosition?.height / 2,
+    };
+    killedCat.current.style.display = `block`;
+    killedCat.current.style.transitionDuration = `0s`;
+    await delay(20);
+    killedCat.current.style.filter = `blur(0px)`;
+    killedCat.current.style.top = `${originalCenter.y}px`;
+    killedCat.current.style.left = `${originalCenter.x}px`;
+    killedCat.current.style.transform = `translateY(0)`;
+    killedCat.current.style.opacity = `0`;
+    await delay(20);
+    killedCat.current.style.transitionDuration = `0.5s`;
+    await delay(20);
+    killedCat.current.style.opacity = `1`;
+    killedCat.current.style.transform = `translateY(-100%)`;
+    await delay(500);
+    killedCat.current.style.filter = `blur(2px)`;
+    killedCat.current.style.opacity = `0`;
+    await delay(500);
+    return;
   };
 
   useEffect(() => {
     handleAnimation();
-  }, [catMovements]);
+}, [catMovements]);
 
-  const handleBox = (index: number) => {
+  const handleBox = async (index: number) => {
     possibleLocations.delete(index);
+    setAnimating(true);
+    await killCat(index);
     setPossibleLocations(new Set(possibleLocations));
     catSteps();
   };
@@ -122,24 +161,27 @@ function App() {
   };
 
   return (
-    <div className="w-full h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 flex flex-col justify-center items-center font-mono">
+    <>
+    <div className="-z-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 fixed w-full h-full"></div>
+    <div className="w-full h-full flex flex-col md:justify-evenly items-center font-mono px-8">
     <Transition in={open} timeout={300}>
         {(state) => (<div
           id="modal"
-          className="w-full h-full absolute bg-black/40 flex justify-center items-center transition-opacity duration-300"
+          className="w-full h-full absolute bg-black/40 flex justify-center items-center transition-opacity duration-300 z-20"
           style={{
             ...transitionStyles[state],
             pointerEvents: state === "exited" ? "none" : "all",
           }}
         >
-          <div className="bg-white p-4 flex flex-col gap-20 items-center rounded-lg">
-            <h1 className="text-center">You caught a Schrodinger's kitty!</h1>
+          <div className="bg-fuchsia-900 px-12 py-8 flex flex-col gap-20 items-center rounded-lg shadow-xl text-white">
+            <h1 className="text-center font-semibold text-2xl">You caught Schrodinger's kitty!</h1>
             <img className="h-16 w-16" src="/BlobCatHotSip.gif" />
-            <div className="flex gap-60">
-              <button onClick={() => restart()}>Start Over</button>
+            <div className="flex gap-40 text-xl underline underline-offset-8">
+              <button onClick={() => restart()} className="hover:opacity-80">Start Over</button>
               <a
                 href="https://cataas.com/cat/says/you%20caught%20me%20:("
                 target="_blank"
+                className="hover:opacity-80"
               >
                 View Kitty
               </a>
@@ -148,11 +190,20 @@ function App() {
         </div>)}
     </Transition>  
 
+    <div ref={killedCat} className="absolute transition-all text-5xl" style={{
+        display: `none`,
+        opacity: 0,
+    }}>
+        <div className="-translate-x-1/2 -translate-y-1/2">
+            🐱
+        </div>
+    </div>
+
       {catMovements.map((catMovement, i) => {
         return (
           <div
             key={`movement-${i}`}
-            className="absolute transition-all text-3xl"
+            className="absolute transition-all text-5xl"
             ref={(ref) => (catMovement.ref = ref)}
             style={{
               display: "none",
@@ -160,31 +211,25 @@ function App() {
               transitionDuration: "0s",
             }}
           >
-            🐱
+            <div className="-translate-x-1/2 -translate-y-1/2">
+                🐱
+            </div>
           </div>
         );
       })}
-      <h1 className="text-6xl">
-        Try to catch a cat <img src="meow_box.png" className="inline w-16" />
+      <h1 className="text-3xl font-semibold text-white text-center my-8">
+        Catch Schrodinger's Cat <img src="meow_box.png" className="inline w-16" />
       </h1>
-      <div className="flex gap-24 flex-row mt-16 ">
-        <button
-          className="text-4xl w-40 text-center"
-          disabled={count <= 1 || animating}
-          onClick={() => setCount(count - 1)}
-        >
-          Remove
-        </button>
-        <p className="text-3xl w-40 text-center">{count}</p>
-        <button
-          className="text-4xl w-40 text-center"
-          disabled={count > 10 || animating}
-          onClick={() => setCount(count + 1)}
-        >
-          Add
-        </button>
+      <div className="my-8">
+        <h2 className="text-2xl font-semibold text-white mb-4">Rules: </h2>
+        <ol className="text-xl text-white list-decimal relative ml-20">
+            <li>There is a cat hiding among the boxes.</li>
+            <li>You can click on a box to check it for cats.</li>
+            <li>The cat will move to an adjacent box after each check.</li>
+            <li>Eliminate every possible location for the cat to win!</li>
+        </ol>
       </div>
-      <div className="flex gap-3 flex-row mt-32">
+      <div className="flex gap-4 flex-row my-8">
         {boxes.map((_, i) => (
           <div key={`box-${i}`} ref={(ref) => (boxRefs.current[i] = ref)}>
             <button
@@ -192,15 +237,32 @@ function App() {
               onClick={() => handleBox(i)}
               disabled={animating}
             >
-              <img src="box-test.svg" className="w-12 h-12" />
-              <div className={`transition-opacity duration-500 ${possibleLocations.has(i) && !animating ? 'opacity-100' : 'opacity-0'}`}>
+            <img className={`absolute max-h-20 max-w-36 ${possibleLocations.has(i) && !animating ? 'opacity-100' : 'opacity-0'}`} src='cat-face.png'/>
+                <img className="max-h-20 max-w-36" src={animating ? `open-box.png` : `closed-box.png`}/>
+              {/* <div className={`transition-opacity duration-500 ${possibleLocations.has(i) && !animating ? 'opacity-100' : 'opacity-0'}`}>
                 🐱
-              </div>
+              </div> */}
             </button>
           </div>
         ))}
       </div>
-      <div className="fixed bottom-4">
+      <div className="flex gap-12 md:gap-24 flex-row mt-16 text-xl text-white">
+        <button
+          className="w-36 text-center border-white border-2 rounded-lg p-2 hover:opacity-80"
+          disabled={count > 10 || animating}
+          onClick={() => setCount(count + 1)}
+        >
+          Add Box
+        </button>
+        <button
+          className="w-36 text-center border-white border-2 rounded-lg p-2 hover:opacity-80"
+          disabled={count <= 1 || animating}
+          onClick={() => setCount(count - 1)}
+        >
+          Remove Box
+        </button>
+      </div>
+      <div className="text-xl md:text-2xl text-white px-8 text-center my-12">
         <p>
           Made with &hearts; by{" "}
           <a href="https://github.com/newclarityex">Kira</a> and{" "}
@@ -209,6 +271,7 @@ function App() {
         </p>
       </div>
     </div>
+    </>
   );
 }
 
