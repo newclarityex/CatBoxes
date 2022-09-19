@@ -263,9 +263,9 @@ function App() {
       <div className="text-xl 2xl:text-2xl text-white px-8 text-center my-12">
         <p>
           Made with &hearts; by{" "}
-          <a href="https://github.com/newclarityex">Kira</a> and{" "}
-          <a href="https://github.com/SleepySonya">Sonya</a>. Boxes by{" "}
-          <a href="https://discord.com/users/189110347943116800">Purple</a>.
+          <a href="https://github.com/newclarityex" className="underline" target="_blank">Kira</a> and{" "}
+          <a href="https://github.com/SleepySonya"  className="underline" target="_blank">Sonya</a>. Boxes by{" "}
+          <a href="https://twitter.com/PurplePLS" className="underline" target="_blank">Purple</a>.
         </p>
       </div>
     </div>
