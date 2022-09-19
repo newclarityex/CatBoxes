@@ -168,7 +168,7 @@ function App() {
     <Transition in={open} timeout={300}>
         {(state) => (<div
           id="modal"
-          className="w-full h-full absolute bg-black/40 flex justify-center items-center transition-opacity duration-300 z-20"
+          className="w-full h-full fixed bg-black/40 flex justify-center items-center transition-opacity duration-300 z-20"
           style={{
             ...transitionStyles[state],
             pointerEvents: state === "exited" ? "none" : "all",
@@ -191,7 +191,7 @@ function App() {
         </div>)}
     </Transition>  
 
-    <div ref={killedCat} className="absolute transition-all text-5xl" style={{
+    <div ref={killedCat} className="absolute transition-all text-5xl z-10" style={{
         display: `none`,
         opacity: 0,
     }}>
@@ -204,7 +204,7 @@ function App() {
         return (
           <div
             key={`movement-${i}`}
-            className="absolute transition-all text-5xl"
+            className="absolute transition-all text-5xl z-10"
             ref={(ref) => (catMovement.ref = ref)}
             style={{
               display: "none",
@@ -234,15 +234,12 @@ function App() {
         {boxes.map((_, i) => (
           <div key={`box-${i}`} ref={(ref) => (boxRefs.current[i] = ref)}>
             <button
-              className="text-2xl"
+              className="text-2xl relative"
               onClick={() => handleBox(i)}
               disabled={animating}
             >
-            <img className={`absolute max-h-20 max-w-36 ${possibleLocations.has(i) && !animating ? 'opacity-100' : 'opacity-0'}`} src='cat-face.png'/>
+            <img className={`absolute w-full h-full ${possibleLocations.has(i) && !animating ? 'opacity-100' : 'opacity-0'}`} src='cat-face.png'/>
                 <img className="max-h-20 max-w-36" src={animating ? `open-box.png` : `closed-box.png`}/>
-              {/* <div className={`transition-opacity duration-500 ${possibleLocations.has(i) && !animating ? 'opacity-100' : 'opacity-0'}`}>
-                🐱
-              </div> */}
             </button>
           </div>
         ))}
